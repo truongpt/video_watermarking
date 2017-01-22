@@ -76,14 +76,14 @@ void watermark_log_data(const MotionVector mvd)
     //end of data from here
     return;
   } else if (999 != wm_table[i].wm_data && 1 == is_space_or_end) {
-    fprintf(watermark_file,"%s"," ");
+    fprintf(watermark_file,"%s\n"," ");
     is_space_or_end = 0;
   } else if (2 == is_space_or_end) {
       //end of data
       return;
   }
   //log data to file
-  fprintf(watermark_file,"%03d",wm_table[i].wm_data);
+  fprintf(watermark_file,"%03d\n",wm_table[i].wm_data);
 }
 
 int watermark_read_data(int *r_data)
