@@ -43,7 +43,7 @@ void watermark_open(char *file_name, unsigned char thres_value, unsigned char em
   mode = embed_mode;
 }
 
-void watermark_close(char *file_name)
+void watermark_close(void)
 {
   fclose(watermark_file);
 }

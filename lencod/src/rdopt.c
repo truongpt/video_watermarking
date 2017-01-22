@@ -1359,7 +1359,6 @@ void set_coeff_and_recon_8x8_p_slice (Macroblock* currMB)
       }
     }    
 
-
     //====== set the mv's for 8x8 partition with transform size 8x8 ======
     //save the mv data for 4x4 transform
     StoreMV8x8(currSlice, 1);
@@ -1851,13 +1850,13 @@ int RDCost_for_macroblocks (Macroblock  *currMB,   // <-- Current Macroblock to 
   //=====
   //=====  Set Motion Vectors
   //=====
-  currSlice->set_motion_vectors_mb (currMB);
-
+  currSlice->set_motion_vectors_mb (currMB, 1);
   //=====
   //=====  Get coefficients, reconstruction values, CBP etc
   //=====
   if (mode < P8x8)
   {
+  
     currSlice->luma_residual_coding(currMB);
   }
   else if (mode == P8x8)
@@ -1930,6 +1929,7 @@ int RDCost_for_macroblocks (Macroblock  *currMB,   // <-- Current Macroblock to 
   //=====   S T O R E   C O D I N G   S T A T E   =====
   //---------------------------------------------------
   currSlice->store_coding_state (currMB, currSlice->p_RDO->cs_cm);
+  
 
   //=====
   //=====   GET RATE
@@ -1960,6 +1960,7 @@ int RDCost_for_macroblocks (Macroblock  *currMB,   // <-- Current Macroblock to 
   {
     rate = currSlice->write_MB_layer (currMB, 1, &coeff_rate);
   }
+
 
   //=====   R E S T O R E   C O D I N G   S T A T E   =====
   //-------------------------------------------------------
@@ -2448,7 +2449,7 @@ static void set_stored_macroblock_parameters_mpass (Macroblock *currMB)
     memcpy(&currSlice->rddata->ipredmode[j][currMB->block_x],&ipredmodes[j][currMB->block_x], BLOCK_MULTIPLE * sizeof(char));
 
   //==== motion vectors =====
-  currSlice->set_motion_vectors_mb (currMB);
+  currSlice->set_motion_vectors_mb (currMB, 0);
 }
 
 /*!
@@ -2652,7 +2653,7 @@ static void set_stored_macroblock_parameters (Macroblock *currMB)
   }
 
   //==== motion vectors =====
-  currSlice->set_motion_vectors_mb (currMB);
+  currSlice->set_motion_vectors_mb (currMB, 0);
 }
 
 
@@ -2872,7 +2873,7 @@ static void set_stored_macroblock_parameters_sp (Macroblock *currMB)
   }
 
   //==== motion vectors =====
-  currSlice->set_motion_vectors_mb (currMB);
+  currSlice->set_motion_vectors_mb (currMB, 0);
 }
 
 
@@ -3651,6 +3652,7 @@ void assign_enc_picture_params (Macroblock *currMB, int mode, Info8x8 *best, int
         listX = currSlice->listX[list + list_offset][0];
         break;
       case 2:
+	// for bi refer
         curr_mv = currSlice->bipred_mv[1][list][0][mode] ; //best->ref[LIST_0] has to be zero in this case
         listX = currSlice->listX[list + list_offset][0];
         break;

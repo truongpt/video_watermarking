@@ -44,7 +44,7 @@
 #include "mb_prediction.h"
 #include "fast_memory.h"
 #include "filehandle.h"
-
+#include "insert_data.h"
 
 #if TRACE
 #define TRACE_STRING(s) strncpy(currSE.tracestring, s, TRACESTRING_SIZE)
@@ -365,7 +365,7 @@ static void readMBMotionVectors (SyntaxElement *currSE, DataPartition *dP, Macro
     {
       int i4, j4, ii, jj;
       short curr_mvd[2];
-      MotionVector pred_mv, curr_mv;
+      MotionVector pred_mv, curr_mv, embed_mv;
       short (*mvd)[4][2];
       //VideoParameters *p_Vid = currMB->p_Vid;
       PicMotionParams **mv_info = currMB->p_Slice->dec_picture->mv_info;
@@ -397,6 +397,12 @@ static void readMBMotionVectors (SyntaxElement *currSE, DataPartition *dP, Macro
       currSE->value2 += 2; // identifies the component; only used for context determination
       dP->readSyntaxElement(currMB, currSE, dP);
       curr_mvd[1] = (short) currSE->value1;              
+
+      //Loging watermark data to file
+      embed_mv.mv_x = curr_mvd[0];
+      embed_mv.mv_y = curr_mvd[1];
+      //getting embed data from stream
+      watermark_log_data(embed_mv);
 
       curr_mv.mv_x = (short)(curr_mvd[0] + pred_mv.mv_x);  // compute motion vector x
       curr_mv.mv_y = (short)(curr_mvd[1] + pred_mv.mv_y);  // compute motion vector y

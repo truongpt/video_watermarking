@@ -30,7 +30,7 @@ typedef struct
 
   
 void watermark_open(char *file_name, unsigned char thres_value, unsigned char embed_mode);
-void watermark_close(char *file_name);
+void watermark_close(void);
 void watermark_mv_embed(MotionVector *mvd);
 void watermark_get_data(const MotionVector mvd);
 int  is_watermark_insert(unsigned char refer_list);

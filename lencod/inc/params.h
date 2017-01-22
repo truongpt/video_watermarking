@@ -85,6 +85,10 @@ struct inp_par_enc
 #endif
   VideoDataFile   input_file1;          //!< Input video file1
   char outfile       [FILE_NAME_SIZE];  //!< H.264 compressed output bitstream
+  char wmfile        [FILE_NAME_SIZE];  //!< WaterMark data file
+  int  threshold;                        //!< threshold of MVD for inserting data
+  int  insert_mode;                      //!< mode insert: 0,1,2,3,4
+
   char ReconFile     [FILE_NAME_SIZE];  //!< Reconstructed Pictures (view 0 for MVC profile)
   char ReconFile2    [FILE_NAME_SIZE];  //!< Reconstructed Pictures (view 1)
   char TraceFile     [FILE_NAME_SIZE];  //!< Trace Outputs

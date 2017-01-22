@@ -19,6 +19,7 @@
 #include "win32.h"
 #include "h264decoder.h"
 #include "configfile.h"
+#include "insert_data.h"
 
 #define DECOUTPUT_TEST      0
 
@@ -233,6 +234,10 @@ int main(int argc, char **argv)
   Configure(&InputParams, argc, argv);
   //open decoder;
   iRet = OpenDecoder(&InputParams);
+
+  // open watermark for storing data
+  watermark_open(InputParams.wmfile,InputParams.threshold);
+  
   if(iRet != DEC_OPEN_NOERR)
   {
     fprintf(stderr, "Open encoder failed: 0x%x!\n", iRet);
@@ -269,7 +274,7 @@ int main(int argc, char **argv)
   {
     close(hFileDecOutput1);
   }
-
+  watermark_close();
   printf("%d frames are decoded.\n", iFramesDecoded);
   return 0;
 }

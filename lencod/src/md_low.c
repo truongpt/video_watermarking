@@ -641,7 +641,7 @@ void encode_one_macroblock_low (Macroblock *currMB)
       currMB->i16offset = I16Offset  (currMB->cbp, currMB->i16mode);
     }
 
-    currSlice->set_motion_vectors_mb (currMB);
+    currSlice->set_motion_vectors_mb (currMB, 0);
 
     //===== check for SKIP mode =====
     if(p_Vid->P444_joined)

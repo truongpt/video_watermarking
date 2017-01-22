@@ -103,7 +103,7 @@
 #include "get_block_otf.h"
 
 #include "wp.h"
-
+#include "insert_data.h"
 //check the scaling factor to avoid overflow;
 #if !IMGTYPE
 #if JCOST_CALC_SCALEUP && (LAMBDA_ACCURACY_BITS>8) 
@@ -264,8 +264,9 @@ int main(int argc, char **argv)
 
   // init encoder
   init_encoder(p_Enc->p_Vid, p_Enc->p_Inp);
-
-  // encode sequence
+  //Open watermark information
+  watermark_open(p_Enc->p_Inp->wmfile,p_Enc->p_Inp->threshold,p_Enc->p_Inp->insert_mode);
+  // encode sequence  
   encode_sequence(p_Enc->p_Vid, p_Enc->p_Inp);
 
   // terminate sequence
@@ -273,7 +274,7 @@ int main(int argc, char **argv)
 
   free_params (p_Enc->p_Inp);  
   free_encoder(p_Enc);
-
+  watermark_close();
   return 0;
 }
 

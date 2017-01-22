@@ -737,7 +737,7 @@ typedef struct slice
 
   void    (*Get_Direct_Motion_Vectors)          (Macroblock *currMB);
   Boolean (*slice_too_big)                      (int bits_slice); //!< for use of callback functions
-  void    (*set_motion_vectors_mb)              (Macroblock *currMB);
+  void    (*set_motion_vectors_mb)              (Macroblock *currMB, int is_modifed_mv);
   void    (*encode_one_macroblock)              (Macroblock *currMB);
   void    (*set_stored_mb_parameters)           (Macroblock *currMB);
   void    (*set_ref_and_motion_vectors)         (Macroblock *currMB, struct pic_motion_params **motion, Info8x8 *part, int block);
