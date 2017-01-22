@@ -38,7 +38,7 @@ WmElem wm_table[] =
 void watermark_open(char *file_name, unsigned char thres_value, unsigned char embed_mode)
 {
   WM_PRINT("wm file %s, thres value %d mode %d\n",file_name,thres_value,embed_mode);
-  watermark_file = fopen(file_name, "a+");
+  watermark_file = fopen(file_name, "r");
   th_v = thres_value;
   mode = embed_mode;
 }
