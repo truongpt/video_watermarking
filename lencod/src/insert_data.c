@@ -64,7 +64,7 @@ int watermark_mv_embed(MotionVector *mvd, int is_move_pos, int get_next)
     if (0 != watermark_read_data(&wm_data, is_move_pos, get_next))
     {
       WM_ERROR("%s %d Input data error\n",__func__,__LINE__);  
-      return;
+      return -1;
     };
 
     WM_PRINT("wm_data %03d\n",wm_data);
@@ -77,7 +77,7 @@ int watermark_mv_embed(MotionVector *mvd, int is_move_pos, int get_next)
     
     if (0 == is_insert_data) {
       WM_ERROR("Watermark inputted data is not mapping with data in Matrix table\n");
-      return;
+      return -1;
     }
     
     //Modified motion vector
