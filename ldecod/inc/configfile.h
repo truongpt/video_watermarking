@@ -31,6 +31,7 @@ Mapping Map[] = {
     {"OutputFile",               &cfgparams.outfile,                      1,   0.0,                       0,  0.0,              0.0,             FILE_NAME_SIZE, },
     {"WaterMarkFile",            &cfgparams.wmfile,                       1,   0.0,                       0,  0.0,              0.0,             FILE_NAME_SIZE, },
     {"Threshold",                &cfgparams.threshold,                    0,   0.0,                       1,  0.0,              256.0,                             },
+    {"InsertMode",               &cfgparams.insert_mode,                  0,   0.0,                       1,  0.0,              256.0,                             },
     {"RefFile",                  &cfgparams.reffile,                      1,   0.0,                       0,  0.0,              0.0,             FILE_NAME_SIZE, },
     {"WriteUV",                  &cfgparams.write_uv,                     0,   1.0,                       1,  0.0,              1.0,                             },
     {"FileFormat",               &cfgparams.FileFormat,                   0,   0.0,                       1,  0.0,              1.0,                             },

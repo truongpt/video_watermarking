@@ -19,6 +19,7 @@
 
 FILE *watermark_file;
 unsigned char th_v = 0;
+unsigned char mode = 0; //0: no effect, 1: forward mv, 2 backward, 3: bi-predict, 4: no embed
 unsigned char is_space_or_end = 0; // 1: space,  2: end 
 
 
@@ -35,16 +36,22 @@ WmElem wm_table[] =
    {{ 0, 0},999},   
  };
 
-void watermark_open(char *file_name, unsigned char thres_value)
+void watermark_open(char *file_name, unsigned char thres_value, unsigned char embed_mode)
 {
-  WM_PRINT("wm file %s, thres value %d\n",file_name,thres_value);
+  WM_PRINT("wm file %s, thres value %d embed_mode %d\n",file_name,thres_value,embed_mode);
   watermark_file = fopen(file_name, "w");
   th_v = thres_value;
+  mode = embed_mode;  
 }
 
 void watermark_close(void)
 {
   fclose(watermark_file);
+}
+
+int is_watermark_insert(unsigned char refer_list)
+{
+  return (mode & (refer_list + 1));
 }
 
 void watermark_log_data(const MotionVector mvd)

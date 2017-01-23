@@ -971,6 +971,7 @@ typedef struct inp_par
   char outfile[FILE_NAME_SIZE];                      //!< Decoded YUV 4:2:0 output
   char wmfile[FILE_NAME_SIZE];                       //!< Storing watermark data, which is extraed from bitstream
   int  threshold;
+  int  insert_mode;
   char reffile[FILE_NAME_SIZE];                      //!< Optional YUV 4:2:0 reference file for SNR measurement
 
   int FileFormat;                         //!< File format of the Input file, PAR_OF_ANNEXB or PAR_OF_RTP

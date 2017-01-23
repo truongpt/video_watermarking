@@ -32,7 +32,8 @@ typedef struct
 }WmElem;
 
   
-void watermark_open(char *file_name, unsigned char thres_value);
+void watermark_open(char *file_name, unsigned char thres_value, unsigned char embed_mode);
 void watermark_close(void);
 void watermark_log_data(const MotionVector mvd);
+int  is_watermark_insert(unsigned char refer_list);
 

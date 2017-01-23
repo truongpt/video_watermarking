@@ -12,9 +12,11 @@
 *************************************************************************************
 */
 #include <stdio.h>
-#include "global.h"
 
-#ifdef TEST
+/* #define TEST */
+#ifndef TEST
+#include "global.h"
+#else
 typedef struct
 {
   short mv_x;
@@ -31,6 +33,6 @@ typedef struct
   
 void watermark_open(char *file_name, unsigned char thres_value, unsigned char embed_mode);
 void watermark_close(void);
-void watermark_mv_embed(MotionVector *mvd);
+int  watermark_mv_embed(MotionVector *mvd, int is_move_pos, int get_next);
 void watermark_get_data(const MotionVector mvd);
 int  is_watermark_insert(unsigned char refer_list);

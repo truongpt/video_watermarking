@@ -2971,7 +2971,7 @@ int writeMotionVector8x8 (Macroblock *currMB,
 
   MotionVector **all_mv     = currSlice->all_mv[list_idx][refindex][mv_mode];
   MotionVector *cur_mv;
-  MotionVector predMV; 
+  MotionVector predMV, embed_mv; 
   PicMotionParams **motion = p_Vid->enc_picture->mv_info;
   //MotionVector   **final_mv = &motion->mv[list_idx][currMB->block_y];
   short mvd[2];
@@ -3000,6 +3000,13 @@ int writeMotionVector8x8 (Macroblock *currMB,
       mvd[0] = cur_mv->mv_x - predMV.mv_x;
       mvd[1] = cur_mv->mv_y - predMV.mv_y;
 
+      if (currMB->write_mb && is_watermark_insert(list_idx)) {
+	// Remove watermark if attually it is embbed.
+	embed_mv.mv_x = mvd[0];
+	embed_mv.mv_y = mvd[1];
+	watermark_mv_embed(&embed_mv,1,0);
+	/* printf("%s mvdx %d mvdy %d\n",__func__,mvd[0],mvd[1]); */
+      }
       for (k=0; k<2; ++k)
       {
         curr_mvd = mvd[k];

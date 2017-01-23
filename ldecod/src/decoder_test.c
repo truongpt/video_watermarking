@@ -236,7 +236,7 @@ int main(int argc, char **argv)
   iRet = OpenDecoder(&InputParams);
 
   // open watermark for storing data
-  watermark_open(InputParams.wmfile,InputParams.threshold);
+  watermark_open(InputParams.wmfile,InputParams.threshold, InputParams.insert_mode);
   
   if(iRet != DEC_OPEN_NOERR)
   {

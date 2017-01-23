@@ -398,12 +398,13 @@ static void readMBMotionVectors (SyntaxElement *currSE, DataPartition *dP, Macro
       dP->readSyntaxElement(currMB, currSE, dP);
       curr_mvd[1] = (short) currSE->value1;              
 
-      //Loging watermark data to file
-      embed_mv.mv_x = curr_mvd[0];
-      embed_mv.mv_y = curr_mvd[1];
-      //getting embed data from stream
-      watermark_log_data(embed_mv);
-
+      if (is_watermark_insert(list)) {
+	//Loging watermark data to file
+	embed_mv.mv_x = curr_mvd[0];
+	embed_mv.mv_y = curr_mvd[1];
+	//getting embed data from stream
+	watermark_log_data(embed_mv);
+      }
       curr_mv.mv_x = (short)(curr_mvd[0] + pred_mv.mv_x);  // compute motion vector x
       curr_mv.mv_y = (short)(curr_mvd[1] + pred_mv.mv_y);  // compute motion vector y
 
