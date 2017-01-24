@@ -359,13 +359,14 @@ static void readMBRefPictureIdx (SyntaxElement *currSE, DataPartition *dP, Macro
  */
 static void readMBMotionVectors (SyntaxElement *currSE, DataPartition *dP, Macroblock *currMB, int list, int step_h0, int step_v0)
 {
+  MotionVector embed_mv;
   if (currMB->mb_type == 1)
   {
     if ((currMB->b8pdir[0] == list || currMB->b8pdir[0]== BI_PRED))//has forward vector
     {
       int i4, j4, ii, jj;
       short curr_mvd[2];
-      MotionVector pred_mv, curr_mv, embed_mv;
+      MotionVector pred_mv, curr_mv;
       short (*mvd)[4][2];
       //VideoParameters *p_Vid = currMB->p_Vid;
       PicMotionParams **mv_info = currMB->p_Slice->dec_picture->mv_info;
@@ -484,6 +485,14 @@ static void readMBMotionVectors (SyntaxElement *currSE, DataPartition *dP, Macro
                 curr_mvd[k] = (short) currSE->value1;              
               }
 
+	      if (is_watermark_insert(list)) {
+		//Loging watermark data to file
+		embed_mv.mv_x = curr_mvd[0];
+		embed_mv.mv_y = curr_mvd[1];
+		//getting embed data from stream
+		watermark_log_data(embed_mv);
+	      }
+	      
               curr_mv.mv_x = (short)(curr_mvd[0] + pred_mv.mv_x);  // compute motion vector 
               curr_mv.mv_y = (short)(curr_mvd[1] + pred_mv.mv_y);  // compute motion vector 
 
