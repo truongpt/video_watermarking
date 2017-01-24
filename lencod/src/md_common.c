@@ -22,7 +22,7 @@
 #define RDO_PRINT(...)
 #define BSLICE_PRINT(...)
 
-/* #define EMBED_DATA */ // for embed data to B slice, is being investigated
+#define EMBED_DATA // for embed data to B slice, is being investigated
 
 /*!
  *************************************************************************************
