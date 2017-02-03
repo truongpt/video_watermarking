@@ -3006,6 +3006,7 @@ int writeMotionVector8x8 (Macroblock *currMB,
         embed_mv.mv_y = mvd[1];
         watermark_mv_embed(&embed_mv,1,0);
         /* printf("%s step h %d step v %d\n",__func__,step_h,step_v); */
+        /* printf("%s pred mvdx %d mvdy %d\n",__func__,predMV.mv_x,predMV.mv_y);         */
         /* printf("%s mvdx %d mvdy %d\n",__func__,mvd[0],mvd[1]); */
       }
       for (k=0; k<2; ++k)
