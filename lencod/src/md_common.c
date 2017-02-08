@@ -25,6 +25,8 @@
 #define P8x16_PRINT(...)
 /* #define B16x8_PRINT printf */
 #define B16x8_PRINT(...)
+#define B8x16_PRINT(...)
+/* #define B8x16_PRINT printf */
 
 /*!
  *************************************************************************************
@@ -515,30 +517,115 @@ static void SetMVBSlice16x8(Slice *currSlice, PicMotionParams **motion, Macroblo
  *    Sets motion vectors for a 8x16 partition in a B Slice
  *************************************************************************************
  */
-static void SetMVBSlice8x16(Slice *currSlice, PicMotionParams **motion, Macroblock* currMB, int pos)
+static void SetMVBSlice8x16(Slice *currSlice, PicMotionParams **motion, Macroblock* currMB, int pos, int *next_wm_data, int is_modified_mv)
 {
-  int l0_ref, l1_ref;
+  int l0_ref, l1_ref, i, j, tmp_next_data = 0;
   int pdir = currMB->b8x8[pos >> 1].pdir;
+  int step_v = 4, step_h = 2;  
+  VideoParameters *p_Vid = currMB->p_Vid;
+  PixelPos       block[4];
+  MotionVector predMV, mvd;
+  
   if (pdir == LIST_0) 
   {
     l0_ref = motion[currMB->block_y][currMB->block_x + pos].ref_idx[LIST_0];
+
+    if (1 == is_modified_mv && (is_watermark_insert(LIST_0))) {
+      get_neighbors(currMB, block, pos << 2, 0, step_h<<2);
+      currMB->GetMVPredictor (currMB, block, &predMV, (short) l0_ref, p_Vid->enc_picture->mv_info, LIST_0, (pos << 2), 0, step_h<<2, step_v<<2);
+      mvd.mv_x = currSlice->all_mv [LIST_0][l0_ref][P8x16][0][pos].mv_x - predMV.mv_x;
+      mvd.mv_y = currSlice->all_mv [LIST_0][l0_ref][P8x16][0][pos].mv_y - predMV.mv_y;
+      B8x16_PRINT("%d predmv mvd.mv_x %d mvd.mv_y %d\n",__LINE__,predMV.mv_x,predMV.mv_y);
+      //modified MVD
+      tmp_next_data = watermark_mv_embed(&mvd,0, *next_wm_data);
+      B8x16_PRINT("modified mvd.mv_x %d mvd.mv_y %d\n",mvd.mv_x,mvd.mv_y);
+    
+      for (j = 0; j < 4; j++)
+        {
+          for (i = pos; i < pos + 2; i++)
+            {
+              currSlice->all_mv [LIST_0][l0_ref][P8x16][j][i].mv_x = predMV.mv_x + mvd.mv_x;
+              currSlice->all_mv [LIST_0][l0_ref][P8x16][j][i].mv_y = predMV.mv_y + mvd.mv_y;
+            }
+        }
+    }
     CopyMVBlock8 (&motion[currMB->block_y], currSlice->all_mv [LIST_0][l0_ref][P8x16], LIST_0, currMB->block_x + pos, 0, 4, pos);
     ResetMotionBlock8(&motion[currMB->block_y], LIST_1, currMB->block_x + pos, 0, 4);
   }
   else if (pdir == LIST_1)
   {
     ResetMotionBlock8(&motion[currMB->block_y], LIST_0, currMB->block_x + pos, 0, 4);
-    l1_ref = motion[currMB->block_y][currMB->block_x + pos].ref_idx[LIST_1];    
+    l1_ref = motion[currMB->block_y][currMB->block_x + pos].ref_idx[LIST_1];
+
+    if (1 == is_modified_mv && (is_watermark_insert(LIST_1))) {
+      get_neighbors(currMB, block, pos << 2, 0, step_h<<2);
+      currMB->GetMVPredictor (currMB, block, &predMV, (short) l1_ref, p_Vid->enc_picture->mv_info, LIST_1, (pos << 2), 0, step_h<<2, step_v<<2);
+      mvd.mv_x = currSlice->all_mv [LIST_1][l1_ref][P8x16][0][pos].mv_x - predMV.mv_x;
+      mvd.mv_y = currSlice->all_mv [LIST_1][l1_ref][P8x16][0][pos].mv_y - predMV.mv_y;
+      B8x16_PRINT("%d predmv mvd.mv_x %d mvd.mv_y %d\n",__LINE__,predMV.mv_x,predMV.mv_y);
+      //modified MVD
+      tmp_next_data = watermark_mv_embed(&mvd,0, *next_wm_data);
+      B8x16_PRINT("modified mvd.mv_x %d mvd.mv_y %d\n",mvd.mv_x,mvd.mv_y);
+    
+      for (j = 0; j < 4; j++)
+        {
+          for (i = pos; i < pos + 2; i++)
+            {
+              currSlice->all_mv [LIST_1][l1_ref][P8x16][j][i].mv_x = predMV.mv_x + mvd.mv_x;
+              currSlice->all_mv [LIST_1][l1_ref][P8x16][j][i].mv_y = predMV.mv_y + mvd.mv_y;
+            }
+        }
+    }    
     CopyMVBlock8 (&motion[currMB->block_y], currSlice->all_mv [LIST_1][l1_ref][P8x16], LIST_1, currMB->block_x + pos, 0, 4, pos);
   }
   else
   {
     int bipred_me = currMB->b8x8[pos >> 1].bipred;
     MotionVector *****all_mv = bipred_me ? currSlice->bipred_mv[bipred_me - 1]: currSlice->all_mv;
-
     l0_ref = motion[currMB->block_y][currMB->block_x + pos].ref_idx[LIST_0];
+
+    if (1 == is_modified_mv && (is_watermark_insert(LIST_0))) {
+      get_neighbors(currMB, block, pos << 2, 0, step_h<<2);
+      currMB->GetMVPredictor (currMB, block, &predMV, (short) l0_ref, p_Vid->enc_picture->mv_info, LIST_0, (pos << 2), 0, step_h<<2, step_v<<2);
+      mvd.mv_x = all_mv [LIST_0][l0_ref][P8x16][0][pos].mv_x - predMV.mv_x;
+      mvd.mv_y = all_mv [LIST_0][l0_ref][P8x16][0][pos].mv_y - predMV.mv_y;
+      B8x16_PRINT("%d predmv mvd.mv_x %d mvd.mv_y %d\n",__LINE__,predMV.mv_x,predMV.mv_y);
+      //modified MVD
+      tmp_next_data = watermark_mv_embed(&mvd,0, *next_wm_data);
+      B8x16_PRINT("modified mvd.mv_x %d mvd.mv_y %d\n",mvd.mv_x,mvd.mv_y);
+    
+      for (j = 0; j < 4; j++)
+        {
+          for (i = pos; i < pos + 2; i++)
+            {
+              all_mv [LIST_0][l0_ref][P8x16][j][i].mv_x = predMV.mv_x + mvd.mv_x;
+              all_mv [LIST_0][l0_ref][P8x16][j][i].mv_y = predMV.mv_y + mvd.mv_y;
+            }
+        }
+    }
     CopyMVBlock8(&motion[currMB->block_y], all_mv [LIST_0][l0_ref][P8x16], LIST_0, currMB->block_x + pos, 0, 4, pos);
-    l1_ref = motion[currMB->block_y][currMB->block_x + pos].ref_idx[LIST_1];    
+    
+    l1_ref = motion[currMB->block_y][currMB->block_x + pos].ref_idx[LIST_1];
+    //TODO(truongpt)
+    if (1 == is_modified_mv && (is_watermark_insert(LIST_1))) {
+      get_neighbors(currMB, block, pos << 2, 0, step_h<<2);
+      currMB->GetMVPredictor (currMB, block, &predMV, (short) l1_ref, p_Vid->enc_picture->mv_info, LIST_1, (pos << 2), 0, step_h<<2, step_v<<2);
+      mvd.mv_x = all_mv [LIST_1][l1_ref][P8x16][0][pos].mv_x - predMV.mv_x;
+      mvd.mv_y = all_mv [LIST_1][l1_ref][P8x16][0][pos].mv_y - predMV.mv_y;
+      B8x16_PRINT("%d predmv mvd.mv_x %d mvd.mv_y %d\n",__LINE__,predMV.mv_x,predMV.mv_y);
+      //modified MVD
+      tmp_next_data = watermark_mv_embed(&mvd,0, *next_wm_data);
+      B8x16_PRINT("modified mvd.mv_x %d mvd.mv_y %d\n",mvd.mv_x,mvd.mv_y);
+    
+      for (j = 0; j < 4; j++)
+        {
+          for (i = pos; i < pos + 2; i++)
+            {
+              all_mv [LIST_1][l1_ref][P8x16][j][i].mv_x = predMV.mv_x + mvd.mv_x;
+              all_mv [LIST_1][l1_ref][P8x16][j][i].mv_y = predMV.mv_y + mvd.mv_y;
+            }
+        }
+    }
     CopyMVBlock8(&motion[currMB->block_y], all_mv [LIST_1][l1_ref][P8x16], LIST_1, currMB->block_x + pos, 0, 4, pos);
 
     if (bipred_me && (currSlice->mb_aff_frame_flag || (currSlice->UseRDOQuant && currSlice->RDOQ_QP_Num > 1)))
@@ -554,6 +641,8 @@ static void SetMVBSlice8x16(Slice *currSlice, PicMotionParams **motion, Macroblo
       }
     }
   }
+  //Output next data for next inserting
+  *next_wm_data = tmp_next_data;
 }
 
 /*!
@@ -773,9 +862,10 @@ void SetMotionVectorsMBBSlice (Macroblock* currMB, int is_modified_mv)
     SetMVBSlice16x8(currSlice, motion, currMB, 2, &next_wm_data, is_modified_mv);
   }
   else if (currMB->mb_type == P8x16) // 16x8
-  {        
-    SetMVBSlice8x16(currSlice, motion, currMB, 0);
-    SetMVBSlice8x16(currSlice, motion, currMB, 2);
+  {
+    int next_wm_data = 0;
+    SetMVBSlice8x16(currSlice, motion, currMB, 0, &next_wm_data, is_modified_mv);
+    SetMVBSlice8x16(currSlice, motion, currMB, 2, &next_wm_data, is_modified_mv);
   }
   else if (currMB->mb_type == P8x8 || currMB->mb_type == BSKIP_DIRECT) // 8x8 & Direct/SKIP
   { 
