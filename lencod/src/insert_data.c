@@ -97,48 +97,41 @@ void watermark_get_data(const MotionVector mvd)
 
 int watermark_read_data(int *r_data, int is_move_pos, int get_next)
 {
-  int temp_data = 0, cnt = 0, temp_gn = get_next;
+  int temp_data = 0, cnt = 0;
   char data_embed = 0;
   long cur_pos;
 
   cur_pos = ftell(watermark_file);
 
   //Getting wartermark data from file.
-  while((data_embed = getc(watermark_file)) != EOF) {
-    if (data_embed == ' '){
+  do {
+    //init data
+    temp_data = 0;
+    cnt = 0;
+    while((data_embed = getc(watermark_file)) != EOF) {
+      if (data_embed == ' '){
   	WM_PRINT("space ....\n");
   	*r_data = 999; //special tab
   	if (0 == cnt) {
-	  if (!temp_gn) {
-	    cnt = 3;
-	    temp_data = 999;
-	    break;
-	  } else {
-	    temp_data = 0;
-	    temp_gn = 0;
-	  }
+          cnt = 3;
+          temp_data = 999;
+          break;
   	} else {
   	  WM_ERROR("Input data error cnt = %d line %d\n",cnt,__LINE__);
   	  return -1;
   	}
-    } else if (10 == data_embed /*Line Feed*/){
+      } else if (10 == data_embed /*Line Feed*/){
   	//ignore
-    } else {
+      } else {
   	temp_data = temp_data + (data_embed - '0') * ( (cnt == 0) ? 100 : ((cnt == 1) ? 10 : 1) );
   	cnt++;
-    }
-    //Each data is signalled by 3 charater
-    if (3 == cnt){
-      if (temp_gn) {
-	temp_data = 0;
-	temp_gn = 0;
-	cnt = 0;
-      } else {
-	break;
       }
-    } 
-  }
-    
+      //Each data is signalled by 3 charater
+      if (3 == cnt){
+        break;
+      } 
+    }
+  } while (get_next-- > 0);
   
   if (0 == cnt) {
     *r_data = 999; //empty data
@@ -150,6 +143,7 @@ int watermark_read_data(int *r_data, int is_move_pos, int get_next)
     WM_PRINT("read data %d\n",*r_data);
   }
 
+  
   // keep position
   if (!is_move_pos) {
     fseek(watermark_file, cur_pos, SEEK_SET);
@@ -166,7 +160,7 @@ main()
 
   watermark_open("wm_file_enc.txt",2,1);
 
-  watermark_mv_embed(&insert_mv,1,1);
+  watermark_mv_embed(&insert_mv,0,1);
   printf("mvx %d mvy %d\n",insert_mv.mv_x,insert_mv.mv_y);
 
   watermark_mv_embed(&insert_mv,1,0);
@@ -175,6 +169,18 @@ main()
   watermark_mv_embed(&insert_mv,1,0);
   printf("mvx %d mvy %d\n",insert_mv.mv_x,insert_mv.mv_y);
 
+  watermark_mv_embed(&insert_mv,1,2);
+  printf("mvx %d mvy %d\n",insert_mv.mv_x,insert_mv.mv_y);
+
+  watermark_mv_embed(&insert_mv,1,3);
+  printf("mvx %d mvy %d\n",insert_mv.mv_x,insert_mv.mv_y);
+
+  watermark_mv_embed(&insert_mv,0,2);
+  printf("mvx %d mvy %d\n",insert_mv.mv_x,insert_mv.mv_y);
+
+  watermark_mv_embed(&insert_mv,0,3);
+  printf("mvx %d mvy %d\n",insert_mv.mv_x,insert_mv.mv_y);
+  
   watermark_close();
 }
 #endif

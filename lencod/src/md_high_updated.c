@@ -66,7 +66,7 @@ void encode_one_macroblock_high_updated (Macroblock *currMB)
   short       inter_skip = 0;
   BestMode    md_best;
   Info8x8     best;
-
+  int next_wm_data;
 
   init_md_best(&md_best);
 
@@ -197,7 +197,7 @@ void encode_one_macroblock_high_updated (Macroblock *currMB)
         //=====  LOOP OVER 8x8 SUB-PARTITIONS  (Motion Estimation & Mode Decision) =====
         for (block = 0; block < 4; block++)
         {
-          currSlice->submacroblock_mode_decision(currMB, &enc_mb, p_RDO->tr8x8, p_RDO->cofAC8x8ts[block], block, &cost);
+          currSlice->submacroblock_mode_decision(currMB, &enc_mb, p_RDO->tr8x8, p_RDO->cofAC8x8ts[block], block, &cost, &next_wm_data);
           if(!currMB->valid_8x8)
             break;
           set_subblock8x8_info(b8x8info, P8x8, block, p_RDO->tr8x8);
@@ -216,7 +216,7 @@ void encode_one_macroblock_high_updated (Macroblock *currMB)
         //=====  LOOP OVER 8x8 SUB-PARTITIONS  (Motion Estimation & Mode Decision) =====
         for (block = 0; block < 4; block++)
         {
-          currSlice->submacroblock_mode_decision(currMB, &enc_mb, p_RDO->tr4x4, p_RDO->coefAC8x8[block], block, &cost);
+          currSlice->submacroblock_mode_decision(currMB, &enc_mb, p_RDO->tr4x4, p_RDO->coefAC8x8[block], block, &cost, &next_wm_data);
           if(!currMB->valid_4x4)
             break;
           set_subblock8x8_info(b8x8info, P8x8, block, p_RDO->tr4x4);

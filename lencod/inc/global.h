@@ -726,7 +726,7 @@ typedef struct slice
   int     (*mode_decision_for_I8x8_blocks)      (Macroblock *currMB, int b8, int lambda, distblk *min_cost);
   distblk (*rdcost_for_4x4_intra_blocks)        (Macroblock *currMB, int *c_nz, int b8, int b4, int ipmode, int lambda, int mostProbableMode, distblk min_rdcost);
   distblk (*rdcost_for_8x8_intra_blocks)        (Macroblock *currMB, int *c_nz, int b8, int ipmode, int lambda, distblk min_rdcost, int mostProbableMode);
-  void    (*submacroblock_mode_decision)        (Macroblock *currMB, RD_PARAMS *, RD_8x8DATA *, int ****, int, distblk *);
+  void    (*submacroblock_mode_decision)        (Macroblock *currMB, RD_PARAMS *, RD_8x8DATA *, int ****, int, distblk *, int *);
   void    (*intra_chroma_RD_decision)           (Macroblock *currMB, RD_PARAMS *);
 
   void    (*set_intrapred_4x4)                  (Macroblock *currMB, ColorPlane pl, int img_x,int img_y, int *left_available, int *up_available, int *all_available);

@@ -21,7 +21,10 @@
 #include "q_around.h"
 #include "md_common.h"
 #include "rdopt.h"
+#include "insert_data.h"
 
+
+/* #define P8x8_LOG printf */
 
 void copy_part_info(Info8x8 *b8x8, Info8x8 *part)
 {
@@ -42,7 +45,8 @@ void submacroblock_mode_decision_p_slice(Macroblock *currMB,
                                          RD_8x8DATA *dataTr,
                                          int ****cofACtr,
                                          int block,
-                                         distblk *cost)
+                                         distblk *cost,
+                                         int *next_wm_data)
 {
   VideoParameters *p_Vid = currMB->p_Vid;
   InputParameters *p_Inp = currMB->p_Inp;
@@ -61,7 +65,7 @@ void submacroblock_mode_decision_p_slice(Macroblock *currMB,
   int maxindex =  (transform8x8) ? 2 : 5;
   int block_x, block_y;
   int lambda_mf[3];
-
+ 
   int ****fadjust = transform8x8? p_Vid->ARCofAdj8x8 : p_Vid->ARCofAdj4x4;
 
   //--- set coordinates ---
@@ -80,6 +84,12 @@ void submacroblock_mode_decision_p_slice(Macroblock *currMB,
   Info8x8 *partition = &(dataTr->part[block]);
   Info8x8 best = init_info_8x8_struct();
 
+  //for modifying MVD
+  PixelPos       t_block[4];
+  int step_v = 2, step_h = 2, tmp_next_data = 0;
+  MotionVector t_predMV;
+  MotionVector t_mvd;
+  
   *partition = best;
   if (transform8x8)
     currMB->valid_8x8 = FALSE;
@@ -142,6 +152,34 @@ void submacroblock_mode_decision_p_slice(Macroblock *currMB,
         block_x = currMB->block_x + (block & 0x01)*2;
         block_y = currMB->block_y + (block & 0x02);
         b_ref = best.ref[LIST_0];        
+
+        if (is_watermark_insert(LIST_0))
+        {
+          get_neighbors(currMB, t_block,  i1<<2, j1<<2, step_h<<2);
+          currMB->GetMVPredictor (currMB, t_block, &t_predMV, (short) b_ref, p_Vid->enc_picture->mv_info, LIST_0, (i1<<2), (j1<<2), step_h<<2, step_v<<2);
+          P8x8_LOG("Prediction vector mdx %d mdy %d\n",t_predMV.mv_x, t_predMV.mv_y);
+
+          //For calculate MVD
+          t_mvd.mv_x = currSlice->all_mv[LIST_0][b_ref][mode][j1][i1].mv_x - t_predMV.mv_x;
+          t_mvd.mv_y = currSlice->all_mv[LIST_0][b_ref][mode][j1][i1].mv_y - t_predMV.mv_y;
+
+          //Modify MVD
+          P8x8_LOG("original mvd.mv_x %d mvd.mv_y %d\n",t_mvd.mv_x,t_mvd.mv_y);
+          tmp_next_data = watermark_mv_embed(&t_mvd,0, *next_wm_data);
+          P8x8_LOG("modified mvd.mv_x %d mvd.mv_y %d\n",t_mvd.mv_x,t_mvd.mv_y);
+          
+          //update next data
+          *next_wm_data += tmp_next_data;
+          //That is one block 8x8MB
+          for (int n = 0; n < 2; n++)
+            {
+              for (int m = 0; m < 2; m++)
+                {
+                  currSlice->all_mv[LIST_0][b_ref][mode][j1 + n  ][i1  + m  ].mv_x = t_mvd.mv_x + t_predMV.mv_x;
+                  currSlice->all_mv[LIST_0][b_ref][mode][j1 + n  ][i1  + m  ].mv_y = t_mvd.mv_y + t_predMV.mv_y;
+                }
+            }
+        }
 
         motion[block_y    ][block_x    ].ref_pic [LIST_0] = currSlice->listX[currMB->list_offset][b_ref];
         motion[block_y    ][block_x    ].mv      [LIST_0] = currSlice->all_mv[LIST_0][b_ref][mode][j1    ][i1    ];
@@ -344,7 +382,8 @@ void submacroblock_mode_decision_b_slice(Macroblock *currMB,
                                          RD_8x8DATA *dataTr,
                                          int ****cofACtr,
                                          int block,
-                                         distblk *cost)
+                                         distblk *cost,
+                                         int *next_wm_data)
 {
   VideoParameters *p_Vid = currMB->p_Vid;
   InputParameters *p_Inp = currMB->p_Inp;
