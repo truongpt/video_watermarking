@@ -26,6 +26,8 @@
 
 /* #define P8x8_LOG printf */
 #define P8x8_LOG(...)
+/* #define B8x8_LOG printf */
+#define B8x8_LOG(...)
 
 void copy_part_info(Info8x8 *b8x8, Info8x8 *part)
 {
@@ -419,6 +421,11 @@ void submacroblock_mode_decision_b_slice(Macroblock *currMB,
   int best_nz_coeff[2][2];
 #endif
 
+  //for modifying MVD
+  PixelPos       t_block[4];
+  int step_v = 2, step_h = 2, tmp_next_data = 0;
+  MotionVector t_predMV;
+  MotionVector t_mvd;
 
   Info8x8 *partition = &(dataTr->part[block]);
   Info8x8 best = init_info_8x8_struct();  
@@ -527,6 +534,12 @@ void submacroblock_mode_decision_b_slice(Macroblock *currMB,
           bmcost[BI_PRED_L1] = DISTBLK_MAX;
         }
 
+        if (is_watermark_insert(LIST_0)) {
+          bmcost[LIST_1] = DISTBLK_MAX;
+        } else if (is_watermark_insert(LIST_1)) {
+          bmcost[LIST_0] = DISTBLK_MAX;
+        }
+        
         //--- get prediction direction ----
         determine_prediction_list(bmcost, &best, cost);
 
@@ -539,7 +552,7 @@ void submacroblock_mode_decision_b_slice(Macroblock *currMB,
           motion[block_y  + 1][block_x + 1].ref_idx[k] = best.ref[k];
 
           if (best.bipred)
-          {              
+          {
             motion[block_y     ][block_x    ].mv[k] = currSlice->bipred_mv[best.bipred - 1][k][(short) best.ref[k]][mode][j1    ][i1    ];
             motion[block_y     ][block_x + 1].mv[k] = currSlice->bipred_mv[best.bipred - 1][k][(short) best.ref[k]][mode][j1    ][i1 + 1];
             motion[block_y  + 1][block_x    ].mv[k] = currSlice->bipred_mv[best.bipred - 1][k][(short) best.ref[k]][mode][j1 + 1][i1    ];
@@ -547,6 +560,34 @@ void submacroblock_mode_decision_b_slice(Macroblock *currMB,
           }
           else
           {
+            // Inserting data by modifying MVD
+            if (is_watermark_insert(k))
+              {
+                get_neighbors(currMB, t_block,  i1<<2, j1<<2, step_h<<2);
+                currMB->GetMVPredictor (currMB, t_block, &t_predMV, (short) best.ref[k], p_Vid->enc_picture->mv_info, k, (i1<<2), (j1<<2), step_h<<2, step_v<<2);
+                B8x8_LOG("Prediction vector mdx %d mdy %d\n",t_predMV.mv_x, t_predMV.mv_y);
+
+                //For calculate MVD
+                t_mvd.mv_x = currSlice->all_mv[k][(short) best.ref[k]][mode][j1][i1].mv_x - t_predMV.mv_x;
+                t_mvd.mv_y = currSlice->all_mv[k][(short) best.ref[k]][mode][j1][i1].mv_y - t_predMV.mv_y;
+
+                //Modify MVD
+                /* B8x8_LOG("original mvd.mv_x %d mvd.mv_y %d\n",t_mvd.mv_x,t_mvd.mv_y); */
+                tmp_next_data = watermark_mv_embed(&t_mvd,0, *next_wm_data);
+                B8x8_LOG("modified mvd.mv_x %d mvd.mv_y %d\n",t_mvd.mv_x,t_mvd.mv_y);
+          
+                //update next data
+                *next_wm_data += tmp_next_data;
+                //That is one block 8x8MB
+                for (int n = 0; n < 2; n++)
+                  {
+                    for (int m = 0; m < 2; m++)
+                      {
+                        currSlice->all_mv[k][(short) best.ref[k]][mode][j1 + n][i1 + m].mv_x = t_mvd.mv_x + t_predMV.mv_x;
+                        currSlice->all_mv[k][(short) best.ref[k]][mode][j1 + n][i1 + m].mv_y = t_mvd.mv_y + t_predMV.mv_y;
+                      }
+                  }
+              }
             motion[block_y     ][block_x    ].mv[k] = currSlice->all_mv[k][(short) best.ref[k]][mode][j1    ][i1    ];
             motion[block_y     ][block_x + 1].mv[k] = currSlice->all_mv[k][(short) best.ref[k]][mode][j1    ][i1 + 1];
             motion[block_y  + 1][block_x    ].mv[k] = currSlice->all_mv[k][(short) best.ref[k]][mode][j1 + 1][i1    ];
