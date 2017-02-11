@@ -25,6 +25,7 @@
 
 
 /* #define P8x8_LOG printf */
+#define P8x8_LOG(...)
 
 void copy_part_info(Info8x8 *b8x8, Info8x8 *part)
 {
