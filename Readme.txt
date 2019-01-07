@@ -1,5 +1,8 @@
 A. How To Hide Data By Motion Vector
 ============================
+The JM19.0 codec is modified to able using motion vector to embedded data. Data is inserted when encoding specified stream, and the one can be got by decoding the stream.
+Procedure insert and get data is as below:
+
 1. For encoder: add 3 input parameter.
 -p WaterMarkFile="input embed data file"
 -p Threshold=threshold value of motion vector difference, which is changed ( mvd_x^2 + mv_y^2 <= threshold)
