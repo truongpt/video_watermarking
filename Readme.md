@@ -2,7 +2,7 @@
 The JM19.0 codec is modified to able using motion vector to embedded data. Data is inserted when encoding specified stream, and the one can be got by decoding the stream.
 
 # How to use
-## Encoder is added 3 input parameter.
+## Encoder is added 3 input parameters.
 - p WaterMarkFile="input embed data file"
 - p Threshold=threshold value of motion vector difference, which is changed (mvd_x^2 + mvd_y^2 <= threshold)
 - p InsertMode=insertmode 
@@ -11,7 +11,7 @@ The JM19.0 codec is modified to able using motion vector to embedded data. Data 
   - 2: only modify mv backward
   - 3: both forward and backward
 
-## Decoder is added 3 input parameter.
+## Decoder is added 2 input parameters.
 - p WaterMarkFile="output file for storing embed data, which is get from bitstream"
 - p Threshold=threshold value of motion vector difference, which is changed (mvd_x^2 + mvd_y^2 <= threshold)
 
@@ -38,5 +38,5 @@ Using by modifing base on default config encoder.cfg & decoder.cfg.
 - Input watermark file in encoder is same as output watermark file at decoder.
 
 # Reference
-- The agorithm is implemented base oon [JM Reference Software](http://iphome.hhi.de/suehring/tml)
+- The agorithm is implemented base on [JM Reference Software](http://iphome.hhi.de/suehring/tml)
 - Refer https://vcostudy.com/2018/04/25/che-dau-du-lieu-bang-motion-vector/
