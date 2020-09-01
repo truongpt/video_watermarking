@@ -39,4 +39,4 @@ Using by modifing base on default config encoder.cfg & decoder.cfg.
 
 # Reference
 - The agorithm is implemented base on [JM Reference Software](http://iphome.hhi.de/suehring/tml)
-- Refer https://vcostudy.com/2018/04/25/che-dau-du-lieu-bang-motion-vector/
+- Refer https://gravieb.wordpress.com/2018/04/25/che-dau-du-lieu-bang-motion-vector/
